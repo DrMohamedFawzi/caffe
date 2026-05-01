@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="description" content="اطلب قهوتك الآن عبر الموقع"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>ابن السلطان</title>
+
+
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="./js/script.js" defer></script>
+</head>
+<body>
+    <section class="container">
+<div class="title">كافيه ابن السلطان</div>
+<div class="title">اطلب مشروبك </div>
+<form method="post">
+    <div class="table_enter">
+        <div>رقم الطاولة</div>
+        <input type="number" name="table_id" id="table_id" required>
+    </div>
+    <div class="cards_list">
+        <div class="card caffee">
+            <h2>قهوة</h2>
+        <button type="button" id="coffee_btn_min">-</button>
+        <input type="number" readonly id="coffee" name="coffee" value="0" min="0" max="10">
+        <button type="button" id="coffee_btn_plus">+</button>
+        </div>
+        <div class="card nescafe">
+            <h2>نسكافيه</h2>
+            <button type="button" id="nescafe_btn_min">-</button>
+            <input type="number" readonly id="nescafe" name="nescafe" value="0" min="0" max="10">
+            <button type="button" id="nescafe_btn_plus">+</button>
+        </div>
+        <div class="card capochino">
+            <h2>كابوتشينو</h2>
+            <button type="button" id="capochino_btn_min">-</button>
+            <input type="number" readonly id="capochino" name="capochino" value="0" min="0" max="10">
+            <button type="button" id="capochino_btn_plus">+</button>
+        </div>
+        <div class="card choco">
+            <h2>شوكو</h2>
+            <button type="button" id="choco_btn_min">-</button>
+            <input type="number" readonly name="choco" id="choco" value="0" min="0" max="10">
+            <button type="button" id="choco_btn_plus">+</button>
+        </div>
+    </div>
+    <textarea  maxlength="50" name="note" placeholder="ملاحظات أخرى :مثل السكر وغيره"></textarea>
+    <input type="submit" class="submit" value="تأكيد الطلب">
+</form>
+</section>
+<section class="footer">ابن السلطان (أبو أيمن )</section>
+<footer> شركة MSN-IT لتكنولوجيا المعلومات</footer>
+</body>
+</html>
