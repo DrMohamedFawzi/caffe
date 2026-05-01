@@ -1,4 +1,4 @@
-name: Build Android APK - Location Fix
+name: Build Android APK - Compatibility Fix
 
 on: [push, pull_request]
 
@@ -12,19 +12,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      # استخدام Java 11 لأنها النسخة الوحيدة التي تدعم إصدارات Gradle القديمة
+      - name: Set up JDK 11
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '11'
           distribution: 'temurin'
 
-      - name: Locate Project and Build
+      - name: Locate and Build Project
         run: |
-          # البحث عن مكان ملف settings.gradle
+          # البحث عن مكان المشروع
           SETTINGS_PATH=$(find . -name "settings.gradle" -o -name "settings.gradle.kts" | head -n 1)
           
           if [ -z "$SETTINGS_PATH" ]; then
-            echo "❌ Error: Could not find any Android project files in this repository!"
+            echo "❌ Error: Could not find any Android project files!"
             exit 1
           fi
           
@@ -32,13 +33,15 @@ jobs:
           echo "✅ Project found in: $PROJECT_ROOT"
           cd "$PROJECT_ROOT"
           
-          # إنشاء محرك Gradle والبناء
-          gradle wrapper
+          # تثبيت نسخة Gradle قديمة (6.7.1) تدعم jcenter()
+          gradle wrapper --gradle-version 6.7.1
           chmod +x gradlew
+          
+          # البدء في البناء
           ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Android-App-Success
+          name: Android-App-Classic
           path: "**/build/outputs/apk/debug/*.apk"
