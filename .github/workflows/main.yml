@@ -1,15 +1,10 @@
-name: Build Android APK - Final
+name: Build Android APK - Location Fix
 
-on:
-  push:
-    branches: [ "main", "master" ]
-  pull_request:
-    branches: [ "main", "master" ]
+on: [push, pull_request]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -23,16 +18,27 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Gradle Wrapper
+      - name: Locate Project and Build
         run: |
+          # البحث عن مكان ملف settings.gradle
+          SETTINGS_PATH=$(find . -name "settings.gradle" -o -name "settings.gradle.kts" | head -n 1)
+          
+          if [ -z "$SETTINGS_PATH" ]; then
+            echo "❌ Error: Could not find any Android project files in this repository!"
+            exit 1
+          fi
+          
+          PROJECT_ROOT=$(dirname "$SETTINGS_PATH")
+          echo "✅ Project found in: $PROJECT_ROOT"
+          cd "$PROJECT_ROOT"
+          
+          # إنشاء محرك Gradle والبناء
           gradle wrapper
           chmod +x gradlew
-
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Android-APK
+          name: Android-App-Success
           path: "**/build/outputs/apk/debug/*.apk"
