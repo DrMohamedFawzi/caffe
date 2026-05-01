@@ -1,4 +1,4 @@
-name: Build Android APK - Final Fix
+name: Build Android APK - Final Legacy Fix
 
 on: [push, pull_request]
 
@@ -12,12 +12,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      # نستخدم Java 11 لأنها الأنسب لإصدارات Gradle 7 وما قبلها
+      - name: Set up JDK 11
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '11'
           distribution: 'temurin'
-          cache: gradle
 
       - name: Auto-Fix and Build
         run: |
@@ -28,17 +28,19 @@ jobs:
           cd "$PROJECT_ROOT"
           echo "✅ Working in: $PROJECT_ROOT"
 
-          # 2. إصلاح المشاكل الشائعة في الملفات القديمة (تبديل jcenter بـ mavenCentral)
+          # 2. إصلاح المستودعات (jcenter تعطلت رسمياً)
           find . -name "*.gradle" -type f -exec sed -i 's/jcenter()/mavenCentral()/g' {} +
           
-          # 3. إزالة أي بلوك repositories من settings.gradle لأنه يسبب تعارض في GitHub Actions
-          # سنترك فقط التعريفات الأساسية للمشاريع
+          # 3. حذف أي إعدادات تعارض في settings.gradle
           sed -i '/repositories {/,/}/d' settings.gradle || true
 
-          # 4. بناء التطبيق باستخدام أحدث نسخة مستقرة
-          gradle wrapper --gradle-version 8.2
-          chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          # 4. استخدام Gradle 7.4 (الإصدار الذهبي للمشاريع القديمة لتجنب خطأ ConfigurationTime)
+          # سنقوم بتحميله واستخدامه مباشرة لتجنب تداخل Gradle 9
+          wget -q https://services.gradle.org/distributions/gradle-7.4-bin.zip -P /tmp
+          unzip -q -d /tmp /tmp/gradle-7.4-bin.zip
+          
+          # 5. تشغيل البناء باستخدام المسار المطلق
+          /tmp/gradle-7.4/bin/gradle assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
