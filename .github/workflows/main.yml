@@ -1,4 +1,4 @@
-name: Build Android APK - Ultimate Fix
+name: Build Android APK - Final Fix
 
 on: [push, pull_request]
 
@@ -12,35 +12,36 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # نستخدم Java 11 لأنها الوحيدة المتوافقة مع jcenter والمشاريع القديمة
-      - name: Set up JDK 11
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'temurin'
+          cache: gradle
 
-      - name: Locate, Install Gradle 6 and Build
+      - name: Auto-Fix and Build
         run: |
-          # 1. البحث عن مكان المشروع
+          # 1. تحديد موقع المشروع
           SETTINGS_PATH=$(find . -name "settings.gradle" -o -name "settings.gradle.kts" | head -n 1)
-          if [ -z "$SETTINGS_PATH" ]; then
-            echo "❌ Error: Could not find any Android project files!"
-            exit 1
-          fi
+          if [ -z "$SETTINGS_PATH" ]; then echo "Project not found"; exit 1; fi
           PROJECT_ROOT=$(dirname "$SETTINGS_PATH")
-          echo "✅ Project found in: $PROJECT_ROOT"
-          
-          # 2. تحميل وتثبيت Gradle 6.7.1 يدوياً
-          wget -q https://services.gradle.org/distributions/gradle-6.7.1-bin.zip -P /tmp
-          unzip -q -d /tmp /tmp/gradle-6.7.1-bin.zip
-          
-          # 3. استخدام المسار المطلق لـ Gradle القديم للبناء مباشرة
-          # هذا يضمن عدم استخدام Gradle 9 الموجود على السيرفر
           cd "$PROJECT_ROOT"
-          /tmp/gradle-6.7.1/bin/gradle assembleDebug --stacktrace
+          echo "✅ Working in: $PROJECT_ROOT"
+
+          # 2. إصلاح المشاكل الشائعة في الملفات القديمة (تبديل jcenter بـ mavenCentral)
+          find . -name "*.gradle" -type f -exec sed -i 's/jcenter()/mavenCentral()/g' {} +
+          
+          # 3. إزالة أي بلوك repositories من settings.gradle لأنه يسبب تعارض في GitHub Actions
+          # سنترك فقط التعريفات الأساسية للمشاريع
+          sed -i '/repositories {/,/}/d' settings.gradle || true
+
+          # 4. بناء التطبيق باستخدام أحدث نسخة مستقرة
+          gradle wrapper --gradle-version 8.2
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Android-App-Success
+          name: Mobile-App-Final
           path: "**/build/outputs/apk/debug/*.apk"
